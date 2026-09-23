@@ -1,0 +1,33 @@
+# Tools run through `uv run`, so versions come from uv.lock.
+# Install once per clone: uv run pre-commit install
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        stages: [pre-commit]
+      - id: ty
+        name: ty check
+        entry: uv run ty check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

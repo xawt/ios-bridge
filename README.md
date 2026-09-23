@@ -61,6 +61,25 @@ flowchart LR
 3. ios-bridge opens (or reuses) a unicon session to the device, runs the commands and returns
    structured output to the LLM.
 
+## 🛠️ Development
+
+Requires [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync                        # create .venv and install the package + dev tools
+uv run pre-commit install      # enable git hooks (once per clone)
+uv run ios-bridge              # run the server
+```
+
+| Task       | Command               |
+|------------|-----------------------|
+| Lint       | `uv run ruff check`   |
+| Format     | `uv run ruff format`  |
+| Type check | `uv run ty check`     |
+| Test       | `uv run pytest`       |
+
+Git hooks run ruff on every commit, and ty + pytest on every push.
+
 ## ⚠️ Disclaimer
 
 > [!CAUTION]

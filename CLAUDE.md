@@ -20,3 +20,6 @@
 - Format: `uv run ruff format`
 - Type check: `uv run ty check`
 - Test: `uv run pytest`
+
+Git hooks (pre-commit) run ruff on commit and ty + pytest on push; enable with
+`uv run pre-commit install`.
