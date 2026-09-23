@@ -22,6 +22,7 @@
 [![unicon](https://img.shields.io/badge/powered%20by-unicon-049FD9?style=for-the-badge)](https://pubhub.devnetcloud.com/media/unicon/docs/)
 [![uv](https://img.shields.io/badge/managed%20with-uv-DE5FE9?style=for-the-badge)](https://docs.astral.sh/uv/)
 [![Status](https://img.shields.io/badge/status-early%20development-orange?style=for-the-badge)](#-what-is-it)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=for-the-badge)](LICENSE)
 
 </div>
 
@@ -66,3 +67,7 @@ flowchart LR
 > **Do not use ios-bridge in production.** This is an early-development, experimental project.
 > It lets an LLM change device configuration, and it can get things wrong. Use it only in a lab
 > or other disposable environment, at your own risk.
+
+## 📄 License
+
+Licensed under the [Apache License 2.0](LICENSE).
