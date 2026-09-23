@@ -7,6 +7,8 @@
   Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`, `build`, `perf`, `style`.
 - **Commit messages** do not follow Conventional Commits — write plain, descriptive messages
   (e.g. "Add README with setup instructions").
+- **Merging PRs** uses a merge commit (no squash), with a descriptive subject ending in the PR
+  number: `gh pr merge <N> --merge --subject "<Descriptive title> (#<N>)"`.
 
 ## Dependencies
 
