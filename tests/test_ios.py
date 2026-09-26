@@ -4,8 +4,10 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from unicon.core import errors as unicon_errors
 
 from ios_bridge.devices import IOSDevice, ios
+from ios_bridge.errors import DeviceConnectionError
 
 
 @pytest.fixture(autouse=True)
@@ -32,3 +34,15 @@ def test_ssh_command_ends_options_before_host() -> None:
 
 def test_telnet_command_ends_options_before_host() -> None:
     assert make_device(method="telnet")._start_command() == "telnet -- 10.0.0.2 23"
+
+
+def test_failed_connect_closes_session(fake_connection: MagicMock) -> None:
+    fake_connection.connect.side_effect = unicon_errors.ConnectionError("refused")
+    with pytest.raises(DeviceConnectionError):
+        make_device().connect()
+    fake_connection.disconnect.assert_called_once()
+
+
+def test_disconnect_ignores_unspawned_session(fake_connection: MagicMock) -> None:
+    fake_connection.disconnect.side_effect = AttributeError("spawn is None")
+    make_device().disconnect()

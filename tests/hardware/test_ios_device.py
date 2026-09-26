@@ -28,5 +28,8 @@ def test_context_manager_disconnects(device_args: dict[str, Any]) -> None:
 def test_wrong_password_raises(device_args: dict[str, Any]) -> None:
     args: dict[str, Any] = {**device_args, "password": "wrong-password"}
     dev = IOSDevice(**args)
-    with pytest.raises(DeviceConnectionError):
-        dev.connect()
+    try:
+        with pytest.raises(DeviceConnectionError):
+            dev.connect()
+    finally:
+        dev.disconnect()

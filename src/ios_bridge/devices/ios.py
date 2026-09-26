@@ -1,6 +1,7 @@
 """Cisco IOS device over SSH or Telnet, backed by unicon (no testbed file)."""
 
 import shlex
+from contextlib import suppress
 from typing import Literal
 
 from unicon import Connection
@@ -94,12 +95,17 @@ class IOSDevice(Device):
         try:
             self._conn.connect()
         except _CONNECT_ERRORS as e:
+            self._close_quietly()
             raise DeviceConnectionError(
                 f"Failed to connect to {self.host}:{self.port} over {self.method}: {e}"
             ) from e
 
     def disconnect(self) -> None:
-        if self.connected:
+        self._close_quietly()
+
+    def _close_quietly(self) -> None:
+        # unicon raises if nothing was ever spawned, but a half-open session must still be closed.
+        with suppress(Exception):
             self._conn.disconnect()
 
     @property
