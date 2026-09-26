@@ -42,7 +42,7 @@ class IOSDevice(Device):
 
     def __init__(
         self,
-        ip: str,
+        host: str,
         port: int | None = None,
         method: Method = "ssh",
         *,
@@ -54,7 +54,7 @@ class IOSDevice(Device):
     ) -> None:
         if method not in DEFAULT_PORTS:
             raise ValueError(f"method must be 'ssh' or 'telnet', got {method!r}")
-        self.ip = ip
+        self.host = host
         self.port = port if port is not None else DEFAULT_PORTS[method]
         self.method = method
         self.username = username
@@ -67,7 +67,7 @@ class IOSDevice(Device):
             credentials["enable"] = {"password": enable_password}
 
         self._conn = Connection(
-            hostname=ip,
+            hostname=host,
             start=[self._start_command()],
             os="ios",
             credentials=credentials,
@@ -81,18 +81,18 @@ class IOSDevice(Device):
         )
 
     def _start_command(self) -> str:
-        ip = shlex.quote(self.ip)
+        host = shlex.quote(self.host)
         if self.method == "telnet":
-            return f"telnet {ip} {self.port}"
+            return f"telnet {host} {self.port}"
         options = " ".join(self.ssh_options)
-        return f"ssh {options} -l {shlex.quote(self.username)} -p {self.port} {ip}"
+        return f"ssh {options} -l {shlex.quote(self.username)} -p {self.port} {host}"
 
     def connect(self) -> None:
         try:
             self._conn.connect()
         except _CONNECT_ERRORS as e:
             raise DeviceConnectionError(
-                f"Failed to connect to {self.ip}:{self.port} over {self.method}: {e}"
+                f"Failed to connect to {self.host}:{self.port} over {self.method}: {e}"
             ) from e
 
     def disconnect(self) -> None:

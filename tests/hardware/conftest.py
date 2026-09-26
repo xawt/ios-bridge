@@ -16,7 +16,7 @@ def device_args(request: pytest.FixtureRequest) -> dict[str, Any]:
     if not (host and username and password):
         pytest.skip("pass --device-host, --device-user and --device-password")
     return {
-        "ip": host,
+        "host": host,
         "port": option("--device-port"),
         "method": "telnet",
         "username": username,
