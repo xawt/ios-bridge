@@ -80,6 +80,38 @@ uv run ios-bridge              # run the server
 
 Git hooks run ruff on every commit, and ty + pytest on every push.
 
+### 🔌 Hardware tests
+
+Tests in `tests/hardware/` connect to a real Cisco IOS device over Telnet. They are marked
+`hardware` and left out of normal runs, so `uv run pytest` and the git hooks never touch a device.
+
+Pass the device details as pytest options:
+
+```bash
+uv run pytest -m hardware \
+  --device-host 10.0.0.2 \
+  --device-user admin \
+  --device-password '<password>'
+```
+
+| Option                     | Required | Description                              |
+|----------------------------|----------|------------------------------------------|
+| `--device-host`            | yes      | Device IP or hostname                    |
+| `--device-user`            | yes      | Login username                           |
+| `--device-password`        | yes      | Login password                           |
+| `--device-enable-password` | no       | Enable password, if the device needs one |
+| `--device-port`            | no       | Port (default: 23)                       |
+
+Without the three required options, the hardware tests are skipped. Use `-m ""` instead of
+`-m hardware` to run the hardware and regular tests together.
+
+The tests only run `show` commands and never change the device config. One test deliberately
+logs in with a wrong password, which shows up as a failed login in the device logs.
+
+> [!TIP]
+> Start the command with a space to keep the password out of your shell history
+> (fish and bash with `HISTCONTROL=ignorespace`).
+
 ## ⚠️ Disclaimer
 
 > [!CAUTION]
