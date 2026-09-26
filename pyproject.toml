@@ -6,8 +6,12 @@ readme = "README.md"
 authors = [
     { name = "Jarek", email = "9482128+xawt@users.noreply.github.com" }
 ]
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "genie>=26.8",
+    "pyats>=26.8",
+    "unicon>=26.8",
+]
 
 [project.scripts]
 ios-bridge = "ios_bridge:main"
@@ -32,4 +36,9 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["-ra", "--strict-markers"]
+addopts = ["-ra", "--strict-markers", "-m", "not hardware"]
+markers = ["hardware: needs a real IOS device; run with -m hardware"]
+
+[tool.ty.analysis]
+# unicon ships this module as a compiled extension without type information.
+allowed-unresolved-imports = ["unicon.core.errors"]
