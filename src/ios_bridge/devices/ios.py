@@ -54,6 +54,9 @@ class IOSDevice(Device):
     ) -> None:
         if method not in DEFAULT_PORTS:
             raise ValueError(f"method must be 'ssh' or 'telnet', got {method!r}")
+        # A leading dash would make ssh/telnet parse the host as an option (e.g. ProxyCommand).
+        if not host or host.startswith("-"):
+            raise ValueError(f"invalid host: {host!r}")
         self.host = host
         self.port = port if port is not None else DEFAULT_PORTS[method]
         self.method = method
@@ -83,9 +86,9 @@ class IOSDevice(Device):
     def _start_command(self) -> str:
         host = shlex.quote(self.host)
         if self.method == "telnet":
-            return f"telnet {host} {self.port}"
+            return f"telnet -- {host} {self.port}"
         options = " ".join(self.ssh_options)
-        return f"ssh {options} -l {shlex.quote(self.username)} -p {self.port} {host}"
+        return f"ssh {options} -l {shlex.quote(self.username)} -p {self.port} -- {host}"
 
     def connect(self) -> None:
         try:
