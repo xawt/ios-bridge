@@ -36,7 +36,8 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["-ra", "--strict-markers"]
+addopts = ["-ra", "--strict-markers", "-m", "not hardware"]
+markers = ["hardware: needs a real IOS device; run with -m hardware"]
 
 [tool.ty.analysis]
 # unicon ships this module as a compiled extension without type information.
