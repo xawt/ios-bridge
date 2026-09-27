@@ -717,6 +717,7 @@ source = { editable = "." }
 dependencies = [
     { name = "genie" },
     { name = "pyats" },
+    { name = "pyyaml" },
     { name = "unicon" },
 ]
 
@@ -732,6 +733,7 @@ dev = [
 requires-dist = [
     { name = "genie", specifier = ">=26.8" },
     { name = "pyats", specifier = ">=26.8" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "unicon", specifier = ">=26.8" },
 ]
 
