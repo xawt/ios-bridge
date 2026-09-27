@@ -144,7 +144,16 @@ uv run pytest -m hardware \
 | `--device-enable-password` | no       | Enable password, if the device needs one |
 | `--device-port`            | no       | Port (default: 23)                       |
 
-Without the three required options, the hardware tests are skipped. Use `-m ""` instead of
+Without the three required options, the tests read the host, username, password and timeout
+from your ios-bridge config file instead (see [Configuration](#️-configuration)), so this is
+enough:
+
+```bash
+uv run pytest -m hardware
+```
+
+The tests always connect over Telnet. If neither the options nor a valid config file are
+available, the hardware tests are skipped. Use `-m ""` instead of
 `-m hardware` to run the hardware and regular tests together.
 
 The tests only run `show` commands and never change the device config. One test deliberately
