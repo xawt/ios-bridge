@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Device config holds the password; it belongs in ~/.config/ios-bridge/, never in the repo
+router_config.yaml

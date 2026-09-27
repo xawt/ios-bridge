@@ -61,6 +61,48 @@ flowchart LR
 3. ios-bridge opens (or reuses) a unicon session to the device, runs the commands and returns
    structured output to the LLM.
 
+## ⚙️ Configuration
+
+ios-bridge talks to one device, described in a YAML config file. Create it from the bundled,
+commented example and fill in your device's host, username and password:
+
+```bash
+ios-bridge init-config         # creates ~/.config/ios-bridge/router_config.yaml (mode 600)
+```
+
+```yaml
+device:
+  host: "10.0.0.11"      # required: device IP or hostname
+  username: "admin"      # required
+  password: "changeme"   # required: quote it if it's all digits, e.g. "1234"
+  timeout: 30            # optional: connection timeout in seconds (default 30)
+```
+
+Run `ios-bridge` without arguments to check that the config loads.
+
+The config file is looked up in this order (the first match wins):
+
+1. `--config PATH`
+2. the `IOS_BRIDGE_CONFIG` environment variable
+3. `~/.config/ios-bridge/router_config.yaml` (`$XDG_CONFIG_HOME/ios-bridge/...` if set)
+
+In an MCP client config, point the server at a file with `env`:
+
+```json
+"ios-bridge": {
+  "command": "ios-bridge",
+  "env": { "IOS_BRIDGE_CONFIG": "/home/you/lab/router_config.yaml" }
+}
+```
+
+- The password is stored in plain text, so keep the file private: ios-bridge warns if other users
+  can read it. It is never logged or returned to the LLM.
+- *(planned)* The server will read the file once at startup; restart it after editing.
+- *(planned)* If the file is missing or invalid, the server will still start and its tools will
+  reply with an `ERROR: ...` message explaining what to fix.
+
+See [docs/mcp-spec.md](docs/mcp-spec.md) for the full specification.
+
 ## 🛠️ Development
 
 Requires [uv](https://docs.astral.sh/uv/).
@@ -68,7 +110,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 ```bash
 uv sync                        # create .venv and install the package + dev tools
 uv run pre-commit install      # enable git hooks (once per clone)
-uv run ios-bridge              # run the server
+uv run ios-bridge              # check the config (the MCP server is planned)
 ```
 
 | Task       | Command               |
@@ -102,7 +144,16 @@ uv run pytest -m hardware \
 | `--device-enable-password` | no       | Enable password, if the device needs one |
 | `--device-port`            | no       | Port (default: 23)                       |
 
-Without the three required options, the hardware tests are skipped. Use `-m ""` instead of
+Without the three required options, the tests read the host, username, password and timeout
+from your ios-bridge config file instead (see [Configuration](#️-configuration)), so this is
+enough:
+
+```bash
+uv run pytest -m hardware
+```
+
+The tests always connect over Telnet. If neither the options nor a valid config file are
+available, the hardware tests are skipped. Use `-m ""` instead of
 `-m hardware` to run the hardware and regular tests together.
 
 The tests only run `show` commands and never change the device config. One test deliberately

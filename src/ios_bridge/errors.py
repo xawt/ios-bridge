@@ -7,3 +7,7 @@ class IOSBridgeError(Exception):
 
 class DeviceConnectionError(IOSBridgeError):
     """Connecting or logging in to a device failed."""
+
+
+class ConfigError(IOSBridgeError):
+    """The config file is missing, invalid or cannot be created."""

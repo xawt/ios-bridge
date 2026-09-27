@@ -1,0 +1,11 @@
+# ios-bridge device config.
+# Default location: ~/.config/ios-bridge/router_config.yaml
+#   (override with --config PATH or the IOS_BRIDGE_CONFIG environment variable)
+# Holds a plain-text password: keep it private (chmod 600). It is never logged.
+# The server reads this file once at startup; restart it after editing.
+
+device:
+  host: "10.0.0.11"      # required: device IP or hostname
+  username: "admin"      # required
+  password: "changeme"   # required: quote it if it's all digits, e.g. "1234"
+  timeout: 30            # optional: connection timeout in seconds (default 30)
