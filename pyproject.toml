@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ios-bridge = "ios_bridge:main"
+ios-bridge = "ios_bridge.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
