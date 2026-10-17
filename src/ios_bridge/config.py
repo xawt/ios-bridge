@@ -102,9 +102,14 @@ def write_example_config(path: Path, *, force: bool = False) -> None:
 
     Raises `ConfigWriteError` if the file exists and `force` is false, or it can't be written.
     """
-    flags = os.O_WRONLY | os.O_CREAT | (os.O_TRUNC if force else os.O_EXCL)
     try:
         path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    except OSError as error:
+        reason = "a file is in the way" if isinstance(error, FileExistsError) else error.strerror
+        raise ConfigWriteError(f"Cannot create directory {path.parent}: {reason}") from None
+
+    flags = os.O_WRONLY | os.O_CREAT | (os.O_TRUNC if force else os.O_EXCL)
+    try:
         fd = os.open(path, flags, 0o600)
     except FileExistsError:
         raise ConfigWriteError(f"{path} already exists; use --force to overwrite it.") from None
