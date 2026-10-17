@@ -64,7 +64,7 @@ class DeviceConfig:
     secret: str = field(repr=False)
     timeout: int
 
-    def netmiko_params(self) -> dict[str, str | int]:
+    def connection_params(self) -> dict[str, str | int]:
         """Keyword arguments for `netmiko.ConnectHandler`."""
         return {
             "device_type": DEVICE_TYPES[self.transport],
