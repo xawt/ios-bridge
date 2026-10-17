@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.15"
 dependencies = [
     "netmiko>=4.8.0",
+    "pyyaml>=6.0.3",
     "textfsm>=2.1.0",
 ]
 
