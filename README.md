@@ -65,6 +65,39 @@ flowchart LR
 3. ios-bridge opens (or reuses) a netmiko session to the device, runs the commands and returns
    structured output to the LLM.
 
+## ⚙️ Configuration
+
+ios-bridge talks to one device, described in a YAML config file. Create it from the bundled,
+commented example and fill in your device's host, username and password:
+
+```bash
+ios-bridge init-config         # creates ~/.config/ios-bridge/router_config.yaml (mode 600)
+ios-bridge check-config        # validates the file and prints a summary (password masked)
+```
+
+```yaml
+device:
+  host: "10.0.0.11"        # required: device IP or hostname
+  username: "admin"        # required
+  password: "changeme"     # required: quote it if it's all digits, e.g. "1234"
+  transport: "telnet"      # optional: telnet (default) or ssh
+  port: 23                 # optional: defaults to 23 for telnet, 22 for ssh
+  secret: ""               # optional: enable password, if the login lands in user mode
+  timeout: 30              # optional: connection timeout in seconds (default 30)
+```
+
+The config file is looked up in this order (the first match wins):
+
+1. `--config PATH`
+2. the `IOS_BRIDGE_CONFIG` environment variable
+3. `~/.config/ios-bridge/router_config.yaml` (`$XDG_CONFIG_HOME/ios-bridge/...` if set)
+
+`init-config` writes to the same location and won't overwrite an existing file unless you pass
+`--force`. `check-config` reports every problem in the file at once.
+
+The password is stored in plain text, so keep the file private: `check-config` warns if other
+users can read it.
+
 ## 🛠️ Development
 
 Requires [uv](https://docs.astral.sh/uv/).
@@ -72,7 +105,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 ```bash
 uv sync                        # create .venv and install the package + dev tools
 uv run pre-commit install      # enable git hooks (once per clone)
-uv run ios-bridge              # run the CLI (the MCP server is planned)
+uv run ios-bridge --help       # list the CLI commands (the MCP server is planned)
 ```
 
 | Task       | Command               |
