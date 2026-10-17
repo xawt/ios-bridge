@@ -21,6 +21,18 @@ DEVICE_TYPES: dict[Transport, str] = {"telnet": "cisco_ios_telnet", "ssh": "cisc
 REQUIRED_KEYS = ("host", "username", "password")
 OPTIONAL_KEYS = ("transport", "port", "secret", "timeout")
 
+EXAMPLE_CONFIG = """\
+# ios-bridge device config. Keep this file private: the password is stored in plain text.
+device:
+  host: "10.0.0.11"        # required: device IP or hostname
+  username: "admin"        # required
+  password: "changeme"     # required: quote it if it's all digits, e.g. "1234"
+  transport: "telnet"      # optional: telnet (default) or ssh
+  # port: 23               # optional: defaults to 23 for telnet, 22 for ssh
+  # secret: ""             # optional: enable password, if the login lands in user mode
+  # timeout: 30            # optional: connection timeout in seconds (default 30)
+"""
+
 
 class ConfigError(Exception):
     """The config file is missing, unreadable or invalid. Lists every problem found."""
@@ -75,6 +87,19 @@ def find_config_path(cli_path: Path | None) -> Path:
 def is_readable_by_others(path: Path) -> bool:
     """True if users other than the owner can read the file."""
     return bool(path.stat().st_mode & (stat.S_IRGRP | stat.S_IROTH))
+
+
+def write_example_config(path: Path, *, force: bool = False) -> None:
+    """Write `EXAMPLE_CONFIG` to `path` with mode 600, creating parent directories (mode 700).
+
+    Raises `FileExistsError` if the file exists and `force` is false.
+    """
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    flags = os.O_WRONLY | os.O_CREAT | (os.O_TRUNC if force else os.O_EXCL)
+    fd = os.open(path, flags, 0o600)
+    os.fchmod(fd, 0o600)  # an overwritten file keeps its old mode otherwise
+    with os.fdopen(fd, "w", encoding="utf-8") as file:
+        file.write(EXAMPLE_CONFIG)
 
 
 def load_config(path: Path) -> DeviceConfig:
