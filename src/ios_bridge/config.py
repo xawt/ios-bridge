@@ -125,6 +125,10 @@ def load_config(path: Path) -> DeviceConfig:
         ) from None
     except OSError as error:
         raise ConfigError(path, [f"cannot read file: {error.strerror}"]) from None
+    except UnicodeDecodeError as error:
+        raise ConfigError(
+            path, [f"file is not valid UTF-8 (bad byte at position {error.start})"]
+        ) from None
 
     try:
         data: object = yaml.safe_load(text)
