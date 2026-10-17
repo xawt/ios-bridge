@@ -30,27 +30,31 @@ See `README.md`.
 
 - **Title**: a plain sentence in the imperative that says what the PR achieves, no type prefix
   (e.g. "Load a fetch-pr directory into a typed structure", "Ignore macOS .DS_Store files").
-- **Small, single-purpose PRs** (a one-line config change, a `.gitignore` entry): the description
-  is one short paragraph that says what changed and why. No headings.
-- **Larger PRs** use this structure:
+- **Description** uses this template, with all four sections in this order:
 
   ```markdown
-  ## Summary
-  - One bullet per meaningful change: what was added or changed, naming the modules, functions,
-    files and CLI flags in backticks, and how they behave.
-  - Mention small side fixes as their own bullet.
+  ## 📌 What
+  One or two sentences: what this PR does and where it fits in the project.
 
-  Optional plain paragraphs after the list: naming or design decisions worth knowing, what is
-  deliberately not included yet, what comes next, or which PR this one supersedes.
+  ## 🤔 Why
+  The need behind the change, as a short lead-in followed by a list:
+  - the problem it solves or what it enables
+  - ...
 
-  ## Test plan
-  - [x] `uv run ruff check`, `uv run ruff format --check`, `uv run ty check` pass
-  - [x] A concrete manual check that was run, with its observed result
+  ## 🛠️ Changes
+  - Added/Changed/Removed `path/or/name` – what it is or does
+  - ...
+
+  ## 🧪 How to test
+  1. A step the reviewer runs, e.g. `uv sync`
+  2. The command that shows the change working, and what to expect, e.g. `uv run ios-bridge`
   ```
 
-- The test plan lists only checks that were actually run, each with its result. A check that
-  wasn't run stays unchecked (`- [ ]`) and says why.
-- Write for a reviewer who hasn't seen the work: full sentences, concrete names, no filler.
+- **Changes** has one bullet per file or component, starting with Added / Changed / Removed,
+  then an en dash and a short description. Group closely related files in one bullet
+  (e.g. `uv.lock` and `.python-version`).
+- **How to test** lists concrete steps a reviewer can run, in order, with the expected result.
+- Keep it short and scannable: no long paragraphs, concrete names in backticks.
 - **Before opening a PR**, review the changed code and suggest test cases for it (what to test,
   with which inputs, and the expected outcome). Do not write any tests without explicit approval
   or a direct instruction.
