@@ -155,6 +155,7 @@ def load_config(path: Path) -> DeviceConfig:
 
 
 def _required_str(device: dict, key: str, problems: list[str]) -> str:
+    """Return `device[key]` as a non-empty string, or record a problem and return `""`."""
     value = device.get(key)
     if value is None:
         problems.append(f"device.{key}: required")
@@ -169,6 +170,7 @@ def _required_str(device: dict, key: str, problems: list[str]) -> str:
 
 
 def _optional_str(device: dict, key: str, problems: list[str]) -> str:
+    """Return `device[key]` as a string, `""` if absent; record a problem if it isn't one."""
     value = device.get(key)
     if value is None:
         return ""
@@ -182,6 +184,7 @@ def _optional_str(device: dict, key: str, problems: list[str]) -> str:
 
 
 def _transport(device: dict, problems: list[str]) -> Transport:
+    """Return `device.transport` (default telnet); record a problem if it isn't telnet or ssh."""
     value = device.get("transport", DEFAULT_TRANSPORT)
     if value == "telnet" or value == "ssh":
         return value
@@ -192,6 +195,7 @@ def _transport(device: dict, problems: list[str]) -> Transport:
 def _int_in_range(
     device: dict, key: str, default: int, low: int, high: int, problems: list[str]
 ) -> int:
+    """Return `device[key]` (or `default`) as an int in `low..high`; record a problem if not."""
     value = device.get(key, default)
     if isinstance(value, bool) or not isinstance(value, int) or not low <= value <= high:
         problems.append(f"device.{key}: must be a whole number from {low} to {high}")

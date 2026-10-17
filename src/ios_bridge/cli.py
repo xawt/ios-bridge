@@ -1,3 +1,5 @@
+"""Command-line interface: parses arguments, calls the other modules and prints results."""
+
 import argparse
 import sys
 from importlib.metadata import version
@@ -17,6 +19,10 @@ EXIT_USAGE = 2
 
 
 def main(argv: list[str] | None = None) -> None:
+    """Run the `ios-bridge` command and exit with the command's exit code.
+
+    `argv` defaults to `sys.argv[1:]`. Without a command, prints the help and exits with 2.
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command is None:
@@ -26,6 +32,10 @@ def main(argv: list[str] | None = None) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the argument parser with one subcommand per command.
+
+    Each subcommand stores its handler in `args.handler`; `--config` is shared by all of them.
+    """
     parser = argparse.ArgumentParser(
         prog="ios-bridge",
         description="MCP server that lets an LLM connect to and configure Cisco IOS routers.",
@@ -62,6 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def init_config(args: argparse.Namespace) -> int:
+    """`init-config`: write the example config file. Returns 1 if it exists or can't be written."""
     path = find_config_path(args.config)
     try:
         write_example_config(path, force=args.force)
@@ -76,6 +87,10 @@ def init_config(args: argparse.Namespace) -> int:
 
 
 def check_config(args: argparse.Namespace) -> int:
+    """`check-config`: load the config and print a summary with secrets masked.
+
+    Returns 2 if the config is missing or invalid. Warns if other users can read the file.
+    """
     path = find_config_path(args.config)
     try:
         config = load_config(path)
