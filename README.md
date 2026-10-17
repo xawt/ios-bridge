@@ -71,6 +71,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync                        # create .venv and install the package + dev tools
+uv run pre-commit install      # enable git hooks (once per clone)
 uv run ios-bridge              # run the CLI (the MCP server is planned)
 ```
 
@@ -79,6 +80,8 @@ uv run ios-bridge              # run the CLI (the MCP server is planned)
 | Lint       | `uv run ruff check`   |
 | Format     | `uv run ruff format`  |
 | Type check | `uv run ty check`     |
+
+Git hooks run ruff check and ruff format on every commit.
 
 ## ⚠️ Disclaimer
 
