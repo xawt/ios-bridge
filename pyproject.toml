@@ -1,0 +1,40 @@
+[project]
+name = "ios-bridge"
+version = "0.1.0"
+description = "MCP server that lets an LLM connect to and configure Cisco IOS routers."
+readme = "README.md"
+authors = [
+    { name = "Jarek", email = "9482128+xawt@users.noreply.github.com" }
+]
+requires-python = ">=3.15"
+dependencies = [
+    "netmiko>=4.8.0",
+    "textfsm>=2.1.0",
+]
+
+[project.scripts]
+ios-bridge = "ios_bridge.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.1",
+    "ty>=0.0.89",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py315"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN"]
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+
+[tool.ty.terminal]
+error-on-warning = true

@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# uv / venv
+.venv/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
