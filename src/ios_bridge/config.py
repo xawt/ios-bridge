@@ -115,9 +115,12 @@ def write_example_config(path: Path, *, force: bool = False) -> None:
         raise ConfigWriteError(f"{path} already exists; use --force to overwrite it.") from None
     except OSError as error:
         raise ConfigWriteError(f"Cannot write {path}: {error.strerror}") from None
-    os.fchmod(fd, 0o600)  # an overwritten file keeps its old mode otherwise
-    with os.fdopen(fd, "w", encoding="utf-8") as file:
-        file.write(EXAMPLE_CONFIG)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            os.fchmod(fd, 0o600)  # an overwritten file keeps its old mode otherwise
+            file.write(EXAMPLE_CONFIG)
+    except OSError as error:
+        raise ConfigWriteError(f"Cannot write {path}: {error.strerror}") from None
 
 
 def load_config(path: Path) -> DeviceConfig:
