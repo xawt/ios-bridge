@@ -32,7 +32,8 @@ line-length = 100
 target-version = "py315"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "ANN"]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "D1"]
+ignore = ["D107"]  # __init__ is covered by the class docstring
 
 [tool.ruff.lint.flake8-annotations]
 mypy-init-return = true

@@ -95,12 +95,13 @@ Git hooks (pre-commit) run ruff check and ruff format on commit and ty check on 
 `uv run pre-commit install`. A Claude Code hook (`.claude/hooks/ruff.sh`) also runs ruff format
 and ruff check after every Python edit and reports any remaining errors back to Claude.
 
-## Typing
+## Typing and docstrings
 
 - Every function in `src/` must have full annotations: all arguments and the return type (`-> None` included). One exception: `__init__` may omit `-> None` when at least one argument is annotated (`mypy-init-return`). Ruff's `ANN` rules enforce this.
 - Don't use `Any` (`ANN401`) — use a concrete type, a `Protocol`, or `object`.
 - Use modern syntax: `list[str]`, `X | None`, not `List` / `Optional`.
 - ty warnings fail the check (`error-on-warning`). Don't silence a diagnostic with `# ty: ignore` without a comment explaining why.
+- Every module, class and public function in `src/` has a docstring: what it does, plus what it returns or raises when that isn't obvious. Ruff's `D1` rules enforce this; `__init__` is covered by the class docstring (`D107` ignored).
 
 ## Secrets
 
