@@ -9,6 +9,10 @@ See `README.md`.
 - Entry point: `ios_bridge.cli:main` (`src/ios_bridge/cli.py`); also runs as `uv run python -m ios_bridge`
 - `cli.py` is a thin layer: it parses arguments, calls other modules and prints results.
   Functionality lives in separate modules in `src/ios_bridge/`, not in `cli.py`.
+- CLI commands are argparse subcommands (`ios-bridge <command>`); each command's handler returns
+  the exit code: 0 success, 1 runtime error, 2 usage or config error.
+- Device config: `src/ios_bridge/config.py` (`load_config`, `DeviceConfig`). Never print, log
+  or return the password or enable secret; show them as `***`.
 - Device connections go through netmiko. Parse `show` output with TextFSM (ntc-templates)
   rather than hand-written regex.
 
@@ -66,7 +70,7 @@ Always use `uv`. Never call `pip`, `pip install`, bare `python`, or activate `.v
 
 | Task | Command |
 |---|---|
-| Run the CLI | `uv run ios-bridge` |
+| Run the CLI | `uv run ios-bridge <command>` (`--help` lists them) |
 | Run as module | `uv run python -m ios_bridge` |
 | Run any script/command in the env | `uv run <cmd>` |
 | Add dependency | `uv add <pkg>` |
