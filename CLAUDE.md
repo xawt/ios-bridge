@@ -15,7 +15,7 @@ See `README.md`.
 ## Git conventions
 
 - **Branch names** use Conventional Commits types as a prefix: `<type>/<short-description>`,
-  e.g. `feat/device-pairing`, `fix/usb-reconnect`, `docs/readme`, `chore/ci-setup`.
+  e.g. `feat/show-commands`, `fix/ssh-reconnect`, `docs/readme`, `chore/ci-setup`.
   Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`, `build`, `perf`, `style`.
 - **Commit messages** do not follow Conventional Commits — write plain, descriptive messages
   (e.g. "Add README with setup instructions").
@@ -61,7 +61,8 @@ Always use `uv`. Never call `pip`, `pip install`, bare `python`, or activate `.v
 
 | Task | Command |
 |---|---|
-| Run as module | `uv run python -m <package>` |
+| Run the CLI | `uv run ios-bridge` |
+| Run as module | `uv run python -m ios_bridge` |
 | Run any script/command in the env | `uv run <cmd>` |
 | Add dependency | `uv add <pkg>` |
 | Add dev dependency | `uv add --dev <pkg>` |
@@ -82,7 +83,8 @@ uv run ruff check --fix && uv run ruff format && uv run ty check
 ```
 
 Git hooks (pre-commit) run ruff check and ruff format on commit and ty check on push; enable with
-`uv run pre-commit install`.
+`uv run pre-commit install`. A Claude Code hook (`.claude/hooks/ruff.sh`) also runs ruff format
+and ruff check after every Python edit and reports any remaining errors back to Claude.
 
 ## Typing
 
