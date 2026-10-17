@@ -1,7 +1,7 @@
 [project]
 name = "ios-bridge"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server that lets an LLM connect to and configure Cisco IOS routers."
 readme = "README.md"
 authors = [
     { name = "Jarek", email = "9482128+xawt@users.noreply.github.com" }
