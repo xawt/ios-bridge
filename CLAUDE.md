@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+## Project
+
+ios-bridge — an MCP server that lets an LLM connect to and configure Cisco IOS routers.
+See `README.md`.
+
+- Package sources: `src/ios_bridge/` (src-layout)
+- Entry point: `ios_bridge.cli:main` (`src/ios_bridge/cli.py`); also runs as `uv run python -m ios_bridge`
+- `cli.py` is a thin layer: it parses arguments, calls other modules and prints results.
+  Functionality lives in separate modules in `src/ios_bridge/`, not in `cli.py`.
+- Device connections go through netmiko. Parse `show` output with TextFSM (ntc-templates)
+  rather than hand-written regex.
+
 ## Git conventions
 
 - **Branch names** use Conventional Commits types as a prefix: `<type>/<short-description>`,
