@@ -8,6 +8,8 @@ from typing import Literal
 
 import yaml
 
+from ios_bridge.errors import EXIT_USAGE, IOSBridgeError
+
 type Transport = Literal["telnet", "ssh"]
 
 ENV_VAR = "IOS_BRIDGE_CONFIG"
@@ -34,14 +36,20 @@ device:
 """
 
 
-class ConfigError(Exception):
+class ConfigError(IOSBridgeError):
     """The config file is missing, unreadable or invalid. Lists every problem found."""
+
+    exit_code = EXIT_USAGE
 
     def __init__(self, path: Path, problems: list[str]) -> None:
         self.path = path
         self.problems = problems
         lines = "\n".join(f"  - {problem}" for problem in problems)
         super().__init__(f"Invalid config {path}:\n{lines}")
+
+
+class ConfigWriteError(IOSBridgeError):
+    """The example config file could not be written, e.g. because it already exists."""
 
 
 @dataclass(frozen=True)
@@ -92,11 +100,16 @@ def is_readable_by_others(path: Path) -> bool:
 def write_example_config(path: Path, *, force: bool = False) -> None:
     """Write `EXAMPLE_CONFIG` to `path` with mode 600, creating parent directories (mode 700).
 
-    Raises `FileExistsError` if the file exists and `force` is false.
+    Raises `ConfigWriteError` if the file exists and `force` is false, or it can't be written.
     """
-    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     flags = os.O_WRONLY | os.O_CREAT | (os.O_TRUNC if force else os.O_EXCL)
-    fd = os.open(path, flags, 0o600)
+    try:
+        path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        fd = os.open(path, flags, 0o600)
+    except FileExistsError:
+        raise ConfigWriteError(f"{path} already exists; use --force to overwrite it.") from None
+    except OSError as error:
+        raise ConfigWriteError(f"Cannot write {path}: {error.strerror}") from None
     os.fchmod(fd, 0o600)  # an overwritten file keeps its old mode otherwise
     with os.fdopen(fd, "w", encoding="utf-8") as file:
         file.write(EXAMPLE_CONFIG)

@@ -6,29 +6,33 @@ from importlib.metadata import version
 from pathlib import Path
 
 from ios_bridge.config import (
-    ConfigError,
     find_config_path,
     is_readable_by_others,
     load_config,
     write_example_config,
 )
+from ios_bridge.errors import EXIT_USAGE, IOSBridgeError
 
 EXIT_OK = 0
-EXIT_ERROR = 1
-EXIT_USAGE = 2
 
 
 def main(argv: list[str] | None = None) -> None:
     """Run the `ios-bridge` command and exit with the command's exit code.
 
     `argv` defaults to `sys.argv[1:]`. Without a command, prints the help and exits with 2.
+    An `IOSBridgeError` is printed as `ios-bridge: error: ...` and exits with its `exit_code`;
+    any other exception is a bug and propagates with its traceback.
     """
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help(sys.stderr)
         sys.exit(EXIT_USAGE)
-    sys.exit(args.handler(args))
+    try:
+        sys.exit(args.handler(args))
+    except IOSBridgeError as error:
+        print(f"ios-bridge: error: {error}", file=sys.stderr)
+        sys.exit(error.exit_code)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -72,16 +76,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def init_config(args: argparse.Namespace) -> int:
-    """`init-config`: write the example config file. Returns 1 if it exists or can't be written."""
+    """`init-config`: write the example config file."""
     path = find_config_path(args.config)
-    try:
-        write_example_config(path, force=args.force)
-    except FileExistsError:
-        print(f"{path} already exists; use --force to overwrite it.", file=sys.stderr)
-        return EXIT_ERROR
-    except OSError as error:
-        print(f"Cannot write {path}: {error.strerror}", file=sys.stderr)
-        return EXIT_ERROR
+    write_example_config(path, force=args.force)
     print(f"Created {path} (mode 600). Edit it with your device details.")
     return EXIT_OK
 
@@ -89,14 +86,10 @@ def init_config(args: argparse.Namespace) -> int:
 def check_config(args: argparse.Namespace) -> int:
     """`check-config`: load the config and print a summary with secrets masked.
 
-    Returns 2 if the config is missing or invalid. Warns if other users can read the file.
+    Warns if other users can read the file.
     """
     path = find_config_path(args.config)
-    try:
-        config = load_config(path)
-    except ConfigError as error:
-        print(error, file=sys.stderr)
-        return EXIT_USAGE
+    config = load_config(path)
     if is_readable_by_others(path):
         print(
             f"Warning: {path} is readable by other users; run `chmod 600 {path}`.",

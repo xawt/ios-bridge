@@ -9,8 +9,13 @@ See `README.md`.
 - Entry point: `ios_bridge.cli:main` (`src/ios_bridge/cli.py`); also runs as `uv run python -m ios_bridge`
 - `cli.py` is a thin layer: it parses arguments, calls other modules and prints results.
   Functionality lives in separate modules in `src/ios_bridge/`, not in `cli.py`.
-- CLI commands are argparse subcommands (`ios-bridge <command>`); each command's handler returns
-  the exit code: 0 success, 1 runtime error, 2 usage or config error.
+- CLI commands are argparse subcommands (`ios-bridge <command>`). Exit codes: 0 success,
+  1 runtime error, 2 usage or config error.
+- Errors: expected failures raise a subclass of `IOSBridgeError` (`src/ios_bridge/errors.py`)
+  with a user-facing message and an `exit_code`. Modules raise them; `cli.main` alone catches
+  `IOSBridgeError` and prints `ios-bridge: error: ...`. Wrap library errors (netmiko, OS, YAML)
+  in an `IOSBridgeError` subclass at the module boundary; don't catch them in `cli.py`. Any other
+  exception is a bug and should surface with its traceback.
 - Device config: `src/ios_bridge/config.py` (`load_config`, `DeviceConfig`). Never print, log
   or return the password or enable secret; show them as `***`.
 - Device connections go through netmiko. Parse `show` output with TextFSM (ntc-templates)
