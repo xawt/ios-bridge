@@ -28,8 +28,9 @@ See `README.md`.
 
 ## Pull requests
 
-- **Title**: a plain sentence in the imperative that says what the PR achieves, no type prefix
-  (e.g. "Load a fetch-pr directory into a typed structure", "Ignore macOS .DS_Store files").
+- **Title**: brief, a few words in the imperative that name the purpose of the PR, not a list of
+  what changed; the details go in the description. No type prefix.
+  E.g. "Bootstrap the project", "Add show command tool", "Fix SSH reconnect".
 - **Description** uses this template, with all four sections in this order:
 
   ```markdown
