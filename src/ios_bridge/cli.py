@@ -51,8 +51,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--config",
         type=Path,
         metavar="PATH",
-        help="config file (default: $IOS_BRIDGE_CONFIG, then "
-        "~/.config/ios-bridge/router_config.yaml)",
+        help="config file (default: $IOS_BRIDGE_CONFIG, then ./.config/router_config.yaml, "
+        "then ~/.config/ios-bridge/router_config.yaml)",
     )
 
     commands = parser.add_subparsers(dest="command", metavar="<command>")

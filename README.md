@@ -90,7 +90,8 @@ The config file is looked up in this order (the first match wins):
 
 1. `--config PATH`
 2. the `IOS_BRIDGE_CONFIG` environment variable
-3. `~/.config/ios-bridge/router_config.yaml` (`$XDG_CONFIG_HOME/ios-bridge/...` if set)
+3. `./.config/router_config.yaml` in the current directory, if it exists (gitignored)
+4. `~/.config/ios-bridge/router_config.yaml` (`$XDG_CONFIG_HOME/ios-bridge/...` if set)
 
 `init-config` writes to the same location and won't overwrite an existing file unless you pass
 `--force`. `check-config` reports every problem in the file at once.
