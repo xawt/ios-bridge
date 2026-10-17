@@ -81,7 +81,7 @@ uv run ios-bridge              # run the CLI (the MCP server is planned)
 | Format     | `uv run ruff format`  |
 | Type check | `uv run ty check`     |
 
-Git hooks run ruff check and ruff format on every commit.
+Git hooks run ruff check and ruff format on every commit, and ty check on every push.
 
 ## ⚠️ Disclaimer
 
