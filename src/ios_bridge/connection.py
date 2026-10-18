@@ -69,7 +69,8 @@ class Device:
         try:
             self._enable(session)
         except BaseException:
-            session.disconnect()
+            with suppress(OSError, EOFError):  # keep the original error, not a cleanup one
+                session.disconnect()
             raise
         self._session = session
 
