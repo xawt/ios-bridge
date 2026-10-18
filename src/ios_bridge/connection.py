@@ -5,16 +5,29 @@ from contextlib import suppress
 from netmiko import BaseConnection, ConnectHandler
 from netmiko.exceptions import (
     NetmikoAuthenticationException,
-    NetmikoParsingException,
     NetmikoTimeoutException,
     ReadException,
 )
+from ntc_templates.parse import ParsingException, parse_output
+from textfsm import TextFSMError
 
 from ios_bridge.config import DeviceConfig
 from ios_bridge.errors import IOSBridgeError
 
 type ParsedRow = dict[str, str | list[str]]
 """One record parsed by TextFSM: a field is a string, or a list for `List` values."""
+
+PLATFORM = "cisco_ios"
+"""The ntc-templates platform for both telnet and SSH sessions."""
+
+IOS_ERRORS = (
+    "% invalid input",
+    "% incomplete command",
+    "% ambiguous command",
+    '% type "show ?"',
+    "command authorization failed",
+)
+"""How IOS starts the line that rejects a command, lowercased."""
 
 
 class DeviceError(IOSBridgeError):
@@ -96,37 +109,40 @@ class Device:
     def send_command(self, command: str) -> str:
         """Run one exec command and return its raw output.
 
-        Raises `DeviceError` if not connected or the device doesn't answer in time.
+        Raises `DeviceError` if not connected, the device doesn't answer in time or IOS rejects
+        the command (e.g. `% Invalid input`).
         """
-        output = self._run(command, parse=False)
+        session = self._require_session()
+        try:
+            output = session.send_command(command)
+        except ReadException as error:
+            raise DeviceError(f"`{command}` on {self.target} failed: {error}") from None
+        except OSError, EOFError:
+            raise DeviceError(f"`{command}` on {self.target} failed: connection lost") from None
         if not isinstance(output, str):  # only parsed output (use_textfsm=True) isn't a str
             raise TypeError(f"netmiko returned {type(output).__name__} for raw output")
+        if error := ios_error(output):
+            raise DeviceError(f"`{command}` failed on {self.target}: {error}")
         return output
 
     def send_parsed(self, command: str) -> list[ParsedRow]:
         """Run one `show` command and parse its output with the matching ntc-templates template.
 
-        Returns one dict per parsed record, with lowercase field names. Raises `DeviceError`
-        if there is no template for the command or the output doesn't match it.
+        Returns one dict per parsed record, with lowercase field names; an empty list if there
+        are none. Raises `DeviceError` like `send_command`, or if there is no template for the
+        command or the output doesn't match it.
         """
-        output = self._run(command, parse=True)
-        if not isinstance(output, list):  # raise_parsing_error=True makes netmiko raise instead
-            raise TypeError(f"netmiko returned {type(output).__name__} for parsed output")
-        return output
-
-    def _run(self, command: str, *, parse: bool) -> str | list[ParsedRow] | dict[str, object]:
-        """Send `command` through netmiko, wrapping its errors in `DeviceError`."""
-        session = self._require_session()
+        output = self.send_command(command)
         try:
-            return session.send_command(command, use_textfsm=parse, raise_parsing_error=parse)
-        except NetmikoParsingException:
+            return parse_output(platform=PLATFORM, command=command, data=output)
+        except ParsingException:
             raise DeviceError(
-                f"Cannot parse `{command}` output: no TextFSM template or unexpected output"
+                f"No TextFSM template for `{command}`; try spelling the command out in full"
             ) from None
-        except ReadException as error:
-            raise DeviceError(f"`{command}` on {self.target} failed: {error}") from None
-        except OSError, EOFError:
-            raise DeviceError(f"`{command}` on {self.target} failed: connection lost") from None
+        except TextFSMError:
+            raise DeviceError(
+                f"Cannot parse `{command}` output: it doesn't match the TextFSM template"
+            ) from None
 
     def close(self) -> None:
         """Log out and drop the session. Safe to call when not connected."""
@@ -140,3 +156,15 @@ class Device:
         if self._session is None:
             raise DeviceError(f"Not connected to {self.target}: call connect() first")
         return self._session
+
+
+def ios_error(output: str) -> str | None:
+    """Return the line where IOS rejects the command, or None if the output isn't an error.
+
+    Only the first two lines are checked: an error is short, with at most a `^` marker line
+    before it, and later lines are real output (a banner in `show run` can say anything).
+    """
+    for line in output.strip().splitlines()[:2]:
+        if line.strip().lower().startswith(IOS_ERRORS):
+            return line.strip()
+    return None

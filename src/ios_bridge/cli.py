@@ -1,6 +1,7 @@
 """Command-line interface: parses arguments, calls the other modules and prints results."""
 
 import argparse
+import json
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -12,7 +13,7 @@ from ios_bridge.config import (
     write_example_config,
 )
 from ios_bridge.connection import Device
-from ios_bridge.errors import EXIT_USAGE, IOSBridgeError
+from ios_bridge.errors import EXIT_USAGE, IOSBridgeError, UsageError
 
 EXIT_OK = 0
 
@@ -80,6 +81,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     device_check.set_defaults(handler=check_device)
 
+    run = commands.add_parser(
+        "run",
+        parents=[config_option],
+        help="run a `show` command on the device and print its output",
+    )
+    run.add_argument("words", nargs="+", metavar="COMMAND", help="the command, e.g. `sh ip int br`")
+    run.add_argument(
+        "-p", "--parse", action="store_true", help="parse the output with TextFSM, print JSON"
+    )
+    run.set_defaults(handler=run_command)
+
     return parser
 
 
@@ -133,3 +145,24 @@ def check_device(args: argparse.Namespace) -> int:
         value = version.get(key) or "?"
         print(f"  {label:<9} {value if isinstance(value, str) else ', '.join(value)}")
     return EXIT_OK
+
+
+def run_command(args: argparse.Namespace) -> int:
+    """`run`: run one `show` command and print its raw output, or JSON with `--parse`."""
+    command = " ".join(args.words)
+    if not is_show_command(command):
+        raise UsageError(f"Only `show` commands are allowed, got `{command}`")
+    device = Device(load_config(find_config_path(args.config)))
+    device.connect()
+    try:
+        output = device.send_parsed(command) if args.parse else device.send_command(command)
+    finally:
+        device.close()
+    print(json.dumps(output, indent=2) if args.parse else output)
+    return EXIT_OK
+
+
+def is_show_command(command: str) -> bool:
+    """True if the first word is `show` or an abbreviation IOS accepts for it (`sh`, `sho`)."""
+    first = command.split(maxsplit=1)[0].lower() if command.strip() else ""
+    return len(first) >= 2 and "show".startswith(first)

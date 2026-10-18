@@ -176,6 +176,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "netmiko" },
+    { name = "ntc-templates" },
     { name = "pyyaml" },
     { name = "textfsm" },
 ]
@@ -190,6 +191,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "netmiko", specifier = ">=4.8.0" },
+    { name = "ntc-templates", specifier = ">=9.3.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "textfsm", specifier = ">=2.1.0" },
 ]

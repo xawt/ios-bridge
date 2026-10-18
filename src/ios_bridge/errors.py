@@ -12,3 +12,9 @@ class IOSBridgeError(Exception):
     """
 
     exit_code: int = EXIT_ERROR
+
+
+class UsageError(IOSBridgeError):
+    """A command-line argument is valid for argparse but not allowed, e.g. a non-`show` command."""
+
+    exit_code = EXIT_USAGE
