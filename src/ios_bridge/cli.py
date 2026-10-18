@@ -73,12 +73,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     check.set_defaults(handler=check_config)
 
-    connect = commands.add_parser(
-        "check",
+    device_check = commands.add_parser(
+        "check-device",
         parents=[config_option],
         help="connect to the device and print what `show version` reports",
     )
-    connect.set_defaults(handler=check_device)
+    device_check.set_defaults(handler=check_device)
 
     return parser
 
@@ -115,7 +115,7 @@ def check_config(args: argparse.Namespace) -> int:
 
 
 def check_device(args: argparse.Namespace) -> int:
-    """`check`: connect, run `show version` and print the hostname, version, model and uptime."""
+    """`check-device`: connect, run `show version` and print hostname, version, model, uptime."""
     config = load_config(find_config_path(args.config))
     device = Device(config)
     device.connect()
