@@ -73,6 +73,7 @@ commented example and fill in your device's host, username and password:
 ```bash
 ios-bridge init-config         # creates ~/.config/ios-bridge/router_config.yaml (mode 600)
 ios-bridge check-config        # validates the file and prints a summary (password masked)
+ios-bridge check               # connects and prints hostname, version, model and uptime
 ```
 
 ```yaml
