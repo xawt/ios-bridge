@@ -74,6 +74,7 @@ commented example and fill in your device's host, username and password:
 ios-bridge init-config         # creates ~/.config/ios-bridge/router_config.yaml (mode 600)
 ios-bridge check-config        # validates the file and prints a summary (password masked)
 ios-bridge check-device        # connects and prints hostname, version, model and uptime
+ios-bridge run sh ip int br    # runs a show command; -p prints it parsed by TextFSM as JSON
 ```
 
 ```yaml
