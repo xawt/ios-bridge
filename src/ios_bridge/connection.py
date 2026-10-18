@@ -75,17 +75,21 @@ class Device:
 
     def _enable(self, session: BaseConnection) -> None:
         """Enter enable mode with `secret`, unless the login already landed there."""
-        if session.check_enable_mode():
-            return
-        if not self.config.secret:
-            raise DeviceError(
-                f"Login to {self.target} landed in user mode: set device.secret in the config"
-            )
         try:
+            if session.check_enable_mode():
+                return
+            if not self.config.secret:
+                raise DeviceError(
+                    f"Login to {self.target} landed in user mode: set device.secret in the config"
+                )
             session.enable()
-        except ValueError:
+        except ValueError, ReadException:  # a wrong secret can also leave netmiko waiting
             raise DeviceError(
                 f"Cannot enter enable mode on {self.target}: check device.secret"
+            ) from None
+        except OSError, EOFError:
+            raise DeviceError(
+                f"Cannot enter enable mode on {self.target}: connection lost"
             ) from None
 
     def send_command(self, command: str) -> str:
