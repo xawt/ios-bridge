@@ -54,7 +54,7 @@ class Device:
             raise DeviceError(
                 f"Login to {self.target} failed: check username and password"
             ) from None
-        except NetmikoTimeoutException:
+        except NetmikoTimeoutException, TimeoutError:  # telnet raises the built-in one
             raise DeviceError(
                 f"Cannot connect to {self.target}: timed out after {self.config.timeout} s"
             ) from None
