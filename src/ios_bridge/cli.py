@@ -11,6 +11,7 @@ from ios_bridge.config import (
     load_config,
     write_example_config,
 )
+from ios_bridge.connection import Device
 from ios_bridge.errors import EXIT_USAGE, IOSBridgeError
 
 EXIT_OK = 0
@@ -51,8 +52,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--config",
         type=Path,
         metavar="PATH",
-        help="config file (default: $IOS_BRIDGE_CONFIG, then "
-        "~/.config/ios-bridge/router_config.yaml)",
+        help="config file (default: $IOS_BRIDGE_CONFIG, then ./.config/router_config.yaml, "
+        "then ~/.config/ios-bridge/router_config.yaml)",
     )
 
     commands = parser.add_subparsers(dest="command", metavar="<command>")
@@ -71,6 +72,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="load and validate the config, print a summary",
     )
     check.set_defaults(handler=check_config)
+
+    device_check = commands.add_parser(
+        "check-device",
+        parents=[config_option],
+        help="connect to the device and print what `show version` reports",
+    )
+    device_check.set_defaults(handler=check_device)
 
     return parser
 
@@ -103,4 +111,25 @@ def check_config(args: argparse.Namespace) -> int:
         print("  secret     ***")
     print(f"  transport  {config.transport} (port {config.port})")
     print(f"  timeout    {config.timeout} s")
+    return EXIT_OK
+
+
+def check_device(args: argparse.Namespace) -> int:
+    """`check-device`: connect, run `show version` and print hostname, version, model, uptime."""
+    config = load_config(find_config_path(args.config))
+    device = Device(config)
+    device.connect()
+    try:
+        version = device.send_parsed("show version")[0]
+    finally:
+        device.close()
+    print(f"Connected to {device.target} ({config.transport})")
+    for label, key in (
+        ("hostname", "hostname"),
+        ("version", "version"),
+        ("model", "hardware"),
+        ("uptime", "uptime"),
+    ):
+        value = version.get(key) or "?"
+        print(f"  {label:<9} {value if isinstance(value, str) else ', '.join(value)}")
     return EXIT_OK

@@ -83,12 +83,21 @@ def default_config_path() -> Path:
     return Path(config_home) / "ios-bridge" / CONFIG_FILENAME
 
 
+def local_config_path() -> Path:
+    """`./.config/router_config.yaml`: a per-project config in the current directory."""
+    return Path(".config") / CONFIG_FILENAME
+
+
 def find_config_path(cli_path: Path | None) -> Path:
-    """Pick the config file: `--config`, then `$IOS_BRIDGE_CONFIG`, then the default path."""
+    """Pick the config file: `--config`, then `$IOS_BRIDGE_CONFIG`, then `./.config/` if the
+    file exists there, then the default path.
+    """
     if cli_path is not None:
         return cli_path
     if env_path := os.environ.get(ENV_VAR):
         return Path(env_path)
+    if (local_path := local_config_path()).is_file():
+        return local_path
     return default_config_path()
 
 
