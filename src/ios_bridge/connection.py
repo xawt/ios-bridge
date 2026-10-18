@@ -16,6 +16,15 @@ from ios_bridge.errors import IOSBridgeError
 type ParsedRow = dict[str, str | list[str]]
 """One record parsed by TextFSM: a field is a string, or a list for `List` values."""
 
+IOS_ERRORS = (
+    "% invalid input",
+    "% incomplete command",
+    "% ambiguous command",
+    '% type "show ?"',
+    "command authorization failed",
+)
+"""How IOS starts the line that rejects a command, lowercased."""
+
 
 class DeviceError(IOSBridgeError):
     """Connecting to the device, entering enable mode or running a command failed."""
@@ -96,11 +105,14 @@ class Device:
     def send_command(self, command: str) -> str:
         """Run one exec command and return its raw output.
 
-        Raises `DeviceError` if not connected or the device doesn't answer in time.
+        Raises `DeviceError` if not connected, the device doesn't answer in time or IOS rejects
+        the command (e.g. `% Invalid input`).
         """
         output = self._run(command, parse=False)
         if not isinstance(output, str):  # only parsed output (use_textfsm=True) isn't a str
             raise TypeError(f"netmiko returned {type(output).__name__} for raw output")
+        if error := ios_error(output):
+            raise DeviceError(f"`{command}` failed on {self.target}: {error}")
         return output
 
     def send_parsed(self, command: str) -> list[ParsedRow]:
@@ -140,3 +152,15 @@ class Device:
         if self._session is None:
             raise DeviceError(f"Not connected to {self.target}: call connect() first")
         return self._session
+
+
+def ios_error(output: str) -> str | None:
+    """Return the line where IOS rejects the command, or None if the output isn't an error.
+
+    Only the first two lines are checked: an error is short, with at most a `^` marker line
+    before it, and later lines are real output (a banner in `show run` can say anything).
+    """
+    for line in output.strip().splitlines()[:2]:
+        if line.strip().lower().startswith(IOS_ERRORS):
+            return line.strip()
+    return None
